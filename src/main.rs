@@ -1,7 +1,8 @@
 extern crate libc;
 extern crate x11;
-use std::os::raw::c_uint;
 use std::os::raw::c_void;
+use std::os::raw::c_ushort;
+use std::os::raw::c_ulong;
 use x11::xlib;
 use x11::xrandr;
 use std::ptr::{
@@ -65,21 +66,18 @@ pub fn main() {
         let gammar: f64 = brightness * (WHITEPOINTS[(temp/500) as usize].r * (1f64 - ratio) + WHITEPOINTS[(temp/500+1) as usize].r * ratio);
         let gammag: f64 = brightness * (WHITEPOINTS[(temp/500) as usize].g * (1f64 - ratio) + WHITEPOINTS[(temp/500+1) as usize].g * ratio);
         let gammab: f64 = brightness * (WHITEPOINTS[(temp/500) as usize].b * (1f64 - ratio) + WHITEPOINTS[(temp/500+1) as usize].b * ratio);
-        // println!("{}", gammar);
-        // println!("{}", gammag);
-        // println!("{}", gammab);
         for c in 0..(*res).ncrtc {
-            let crtcxid = (*res).crtcs; // res->crtcs[c];
+            let crtcxid = *((*res).crtcs as *mut c_ulong).offset(c as isize);
 
-            let size = xrandr::XRRGetCrtcGammaSize(display, *crtcxid); // crtcxid used here
+            let size = xrandr::XRRGetCrtcGammaSize(display, crtcxid);
             let crtc_gamma: *mut xrandr::XRRCrtcGamma = xrandr::XRRAllocGamma(size);
             for i in 0..size {
                 let g: f64 = (65535f64 * i as f64) / size as f64;
-                *(*crtc_gamma).red = (g * gammar) as u16; // crtc_gamma->red[i] = g * gammar;
-                *(*crtc_gamma).green = (g * gammag) as u16; // crtc_gamma->green[i] = g * gammag;
-                *(*crtc_gamma).blue = (g * gammab) as u16; // crtc_gamma->blue[i] = g * gammab;
+                *((*crtc_gamma).red as *mut c_ushort).offset(i as isize) = (g * gammar) as u16;
+                *((*crtc_gamma).green as *mut c_ushort).offset(i as isize) = (g * gammag) as u16;
+                *((*crtc_gamma).blue as *mut c_ushort).offset(i as isize) = (g * gammab) as u16;
             }
-            xrandr::XRRSetCrtcGamma(display, *crtcxid, crtc_gamma); // crtcxid used here
+            xrandr::XRRSetCrtcGamma(display, crtcxid, crtc_gamma);
             xlib::XFree(crtc_gamma as *mut c_void);
         }
     }
