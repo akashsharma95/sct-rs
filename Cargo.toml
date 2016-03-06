@@ -1,0 +1,11 @@
+[package]
+name = "sct-rs"
+version = "0.1.0"
+authors = ["nxnfufunezn <nxnfufunezn@gmail.com>"]
+
+[dependencies]
+libc = "*"
+
+[dependencies.x11]
+path = "x11-rs/x11"
+features = ["xlib", "xrandr"]
