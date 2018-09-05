@@ -7,5 +7,5 @@ authors = ["nxnfufunezn <nxnfufunezn@gmail.com>"]
 libc = "*"
 
 [dependencies.x11]
-path = "x11-rs/x11"
+x11 = "*"
 features = ["xlib", "xrandr"]
